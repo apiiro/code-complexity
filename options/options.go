@@ -1,9 +1,14 @@
 package options
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/urfave/cli/v2"
+	"io/fs"
+	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -15,10 +20,18 @@ var Flags = []cli.Flag{
 		Required: false,
 	},
 	&cli.StringFlag{
+		Name:     "config",
+		Aliases:  []string{"c"},
+		Value:    "unset",
+		Usage:    "include/exclude patterns config file",
+		Required: false,
+	},
+	&cli.StringFlag{
 		Name:     "out",
 		Aliases:  []string{"o"},
-		Usage:    "output directory. will be created if does not exist",
-		Required: true,
+		Value:    "",
+		Usage:    "output file, or empty to print to stdout",
+		Required: false,
 	},
 	&cli.StringFlag{
 		Name:     "include",
@@ -51,6 +64,8 @@ var Flags = []cli.Flag{
 
 type Options struct {
 	CodePath         string
+	ConfigFie        string
+	OutputPath       string
 	IncludePatterns  []string
 	ExcludePatterns  []string
 	VerboseLogging   bool
@@ -88,6 +103,8 @@ func validateDirectory(dirPath string, createIfNotExist bool) error {
 func ParseOptions(c *cli.Context) (*Options, error) {
 	opts := &Options{
 		CodePath:         c.String("dir"),
+		OutputPath:       c.String("out"),
+		ConfigFie:        c.String("config"),
 		IncludePatterns:  splitListFlag(c.String("include")),
 		ExcludePatterns:  splitListFlag(c.String("exclude")),
 		VerboseLogging:   c.Bool("verbose"),
@@ -104,6 +121,38 @@ func ParseOptions(c *cli.Context) (*Options, error) {
 		if err != nil {
 			return nil, fmt.Errorf("directory path '%v' is not valid: %v", opts.CodePath, err)
 		}
+	}
+
+	if len(opts.OutputPath) > 0 {
+		parentDirectoryPath := filepath.Dir(opts.OutputPath)
+		err = validateDirectory(parentDirectoryPath, true)
+		if err != nil {
+			return nil, fmt.Errorf("output path '%v' is not valid: %v", opts.OutputPath, err)
+		}
+	}
+
+	cfg := &Config{}
+	if opts.ConfigFie == "unset" {
+		cfg = defaultConfig
+	} else {
+		if _, statErr := os.Stat(opts.ConfigFie); !errors.Is(statErr, fs.ErrNotExist) {
+			log.Printf("will read config from %v", opts.ConfigFie)
+			fileContent, err := os.ReadFile(opts.ConfigFie)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read Config file at %v: %v", opts.ConfigFie, err)
+			}
+			err = json.Unmarshal(fileContent, &cfg)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse Config file at %v: %v", opts.ConfigFie, err)
+			}
+		}
+	}
+
+	if len(cfg.IncludePatterns) > 0 {
+		opts.IncludePatterns = append(opts.IncludePatterns, cfg.IncludePatterns...)
+	}
+	if len(cfg.ExcludePatterns) > 0 {
+		opts.IncludePatterns = append(opts.ExcludePatterns, cfg.ExcludePatterns...)
 	}
 
 	return opts, nil

@@ -47,6 +47,12 @@ OPTIONS:
 			}
 			log.Printf("completed successfully at %v", opts.CodePath)
 			println(string(asJson))
+			if len(opts.OutputPath) > 0 {
+				err = os.WriteFile(opts.OutputPath, asJson, 0777)
+				if err != nil {
+					return fmt.Errorf("failed to write output to %v: %v", opts.OutputPath, err)
+				}
+			}
 			return nil
 		},
 	}

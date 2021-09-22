@@ -368,6 +368,7 @@ var languagesWithAtSignPrefix = map[Language]bool{
 	"python":    true,
 	"kotlin":    true,
 	"scala":     true,
+	"node":      true,
 }
 
 func init() {
