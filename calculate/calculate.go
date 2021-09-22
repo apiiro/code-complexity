@@ -116,6 +116,7 @@ func (ctx *context) getCounters(path string, language Language) (*CodeCounters, 
 	counters := &CodeCounters{}
 
 	minIndentations := float64(0)
+	prevIndentation := float64(-1)
 	expectEndingComment := ""
 	for _, line := range lines {
 		counters.Lines++
@@ -164,19 +165,29 @@ func (ctx *context) getCounters(path string, language Language) (*CodeCounters, 
 
 		counters.LinesOfCode++
 
-		counters.Indentations += float64(len(line) - len(trimSpaceLeft(line)))
-		if minIndentations == 0 || minIndentations < counters.Indentations {
-			minIndentations = counters.Indentations
+		indentation := float64(len(line) - len(trimSpaceLeft(line)))
+		counters.Indentations += indentation
+		if minIndentations == 0 || minIndentations < indentation {
+			minIndentations = indentation
 		}
+		if prevIndentation != -1 {
+			indentationDiff := indentation - prevIndentation
+			if indentationDiff > 0 {
+				counters.IndentationsDiff += indentationDiff
+			}
+		}
+		prevIndentation = indentation
 
 		counters.Keywords = countKeywords(cleanLine, language)
 	}
 
 	if minIndentations > 0 {
 		counters.IndentationsNormalized = counters.Indentations / minIndentations
+		counters.IndentationsDiffNormalized = counters.IndentationsDiff / minIndentations
 	}
 
 	counters.IndentationsComplexity = safeDivide(counters.IndentationsNormalized, counters.LinesOfCode)
+	counters.IndentationsDiffComplexity = safeDivide(counters.IndentationsDiffNormalized, counters.LinesOfCode)
 	counters.KeywordsComplexity = safeDivide(counters.Keywords, counters.LinesOfCode)
 
 	return counters, nil
