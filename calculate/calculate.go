@@ -20,6 +20,15 @@ type context struct {
 	maxFileSizeBytes int64
 }
 
+func newContext() *context {
+	return &context{
+		CodeSummary: CodeSummary{
+			CountersByLanguage: make(map[Language]*CodeCounters),
+			AveragesByLanguage: make(map[Language]*CodeCounters),
+		},
+	}
+}
+
 func Complexity(opts *options.Options) (*CodeSummary, error) {
 
 	includePatterns, err := compileGlobs(opts.IncludePatterns)
@@ -30,16 +39,11 @@ func Complexity(opts *options.Options) (*CodeSummary, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to compile exclude patterns: %v", err)
 	}
-	ctx := &context{
-		CodeSummary: CodeSummary{
-			CountersByLanguage: make(map[Language]*CodeCounters),
-			AveragesByLanguage: make(map[Language]*CodeCounters),
-		},
-		includePatterns:  includePatterns,
-		excludePatterns:  excludePatterns,
-		verboseLogging:   opts.VerboseLogging,
-		maxFileSizeBytes: opts.MaxFileSizeBytes,
-	}
+	ctx := newContext()
+	ctx.includePatterns = includePatterns
+	ctx.excludePatterns = excludePatterns
+	ctx.verboseLogging = opts.VerboseLogging
+	ctx.maxFileSizeBytes = opts.MaxFileSizeBytes
 
 	err = filepath.Walk(
 		opts.CodePath,
@@ -88,7 +92,7 @@ func (ctx *context) visitPath(path string, info fs.FileInfo) error {
 		return nil
 	}
 
-	counters, err := ctx.getCounters(path, language)
+	counters, err := ctx.getCountersForPath(path, language)
 	if err != nil {
 		return fmt.Errorf("failed to count at %v: %v", path, err)
 	}
@@ -105,17 +109,21 @@ func (ctx *context) visitPath(path string, info fs.FileInfo) error {
 	return nil
 }
 
-func (ctx *context) getCounters(path string, language Language) (*CodeCounters, error) {
+func (ctx *context) getCountersForPath(path string, language Language) (*CodeCounters, error) {
 	content, err := ctx.readFile(path)
 	if err != nil {
 		return nil, err
 	}
+	return ctx.getCountersForCode(content, language)
+}
+
+func (ctx *context) getCountersForCode(content string, language Language) (*CodeCounters, error) {
 
 	lines := strings.Split(strings.ReplaceAll(content, "\r\n", "\n"), "\n")
 
 	counters := &CodeCounters{}
 
-	minIndentations := float64(0)
+	minIndentation := float64(0)
 	prevIndentation := float64(-1)
 	expectEndingComment := ""
 	for _, line := range lines {
@@ -166,24 +174,27 @@ func (ctx *context) getCounters(path string, language Language) (*CodeCounters, 
 		counters.LinesOfCode++
 
 		indentation := float64(len(line) - len(trimSpaceLeft(line)))
-		counters.Indentations += indentation
-		if minIndentations == 0 || minIndentations < indentation {
-			minIndentations = indentation
-		}
-		if prevIndentation != -1 {
-			indentationDiff := indentation - prevIndentation
-			if indentationDiff > 0 {
-				counters.IndentationsDiff += indentationDiff
+		if indentation > 0 {
+			counters.Indentations += indentation
+			if minIndentation == 0 || indentation < minIndentation {
+				minIndentation = indentation
+			}
+			if prevIndentation != -1 {
+				indentationDiff := indentation - prevIndentation
+				if indentationDiff > 0 {
+					counters.IndentationsDiff += indentationDiff
+				}
 			}
 		}
+
 		prevIndentation = indentation
 
-		counters.Keywords = countKeywords(cleanLine, language)
+		counters.Keywords += countKeywords(cleanLine, language)
 	}
 
-	if minIndentations > 0 {
-		counters.IndentationsNormalized = counters.Indentations / minIndentations
-		counters.IndentationsDiffNormalized = counters.IndentationsDiff / minIndentations
+	if minIndentation > 0 {
+		counters.IndentationsNormalized = counters.Indentations / minIndentation
+		counters.IndentationsDiffNormalized = counters.IndentationsDiff / minIndentation
 	}
 
 	counters.IndentationsComplexity = safeDivide(counters.IndentationsNormalized, counters.LinesOfCode)
