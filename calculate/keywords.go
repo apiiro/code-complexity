@@ -11,7 +11,7 @@ func countKeywords(line string, language Language) float64 {
 	tokens := strings.Fields(line)
 	tokensSet := make(map[string]bool, len(tokens))
 	for _, token := range strings.Fields(line) {
-		if strings.HasPrefix(token, "@") {
+		if strings.HasPrefix(token, "@") && !strings.HasPrefix(token, "@\"") {
 			if _, found := languagesWithAtSignPrefix[language]; found {
 				keywordsCount++
 			}

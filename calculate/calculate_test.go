@@ -325,7 +325,7 @@ const x = 3;
 /*
 multiline comment
 */
-let x = 3;
+let x = 3
 `
 	counters, err = getCountersForCode(code, "node")
 	r.Nil(err)
@@ -358,7 +358,7 @@ if (x > 3) {
 }
 else {
 	if (x === 7) {
-			x = 8;
+			x = 8
 	}
 }
 `
@@ -380,7 +380,7 @@ if (x > 3) {
 }
 else {
   if (x === 7) {
-     x = 8;
+     x = 8
    }
 }
 `
@@ -668,11 +668,11 @@ val x = "kt"
 	// language=kt
 	code = `
 if (x > 3) {
-	x = 4;
+	x = 4
 }
 else {
 	if (x > 7) {
-			x = 8;
+			x = 8
 	}
 }
 `
@@ -690,11 +690,11 @@ else {
 	// language=kt
 	code = `
 if (x > 3) {
-  x = 4;
+  x = 4
 }
 else {
   if (x > 7) {
-     x = 8;
+     x = 8
    }
 }
 `
@@ -739,7 +739,7 @@ func TestCountersForKotlinFullSample(t *testing.T) {
 
 	r.Equal(float64(183), counters.Lines)
 	r.Equal(float64(125), counters.LinesOfCode)
-	r.Equal(float64(63), counters.Keywords)
+	r.Equal(float64(62), counters.Keywords)
 	r.Equal(float64(592), counters.Indentations)
 	r.Equal(float64(148), math.Round(counters.IndentationsNormalized))
 	r.Equal(float64(128), math.Round(counters.IndentationsDiff))
@@ -787,11 +787,11 @@ val x = "kt"
 
 	code = `
 if (x > 3) {
-	x = 4;
+	x = 4
 }
 else {
 	if (x > 7) {
-			x = 8;
+			x = 8
 	}
 }
 `
@@ -808,11 +808,11 @@ else {
 
 	code = `
 if (x > 3) {
-  x = 4;
+  x = 4
 }
 else {
   if (x > 7) {
-     x = 8;
+     x = 8
    }
 }
 `
@@ -870,11 +870,930 @@ func TestCountersForScalaFullSample(t *testing.T) {
 	r.Equal(float64(33), math.Round(counters.IndentationsDiffComplexity*100))
 }
 
-// c
-// cpp
-// objc
-// swift
-// rb
-// go
-// rs
-// tf
+func TestCountersFoC(t *testing.T) {
+	r := assert.New(t)
+
+	// language=c
+	code := `
+// comment
+int x = 3;
+/* another comment */
+`
+	counters, err := getCountersForCode(code, "c")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=c
+	code = `
+/*
+multiline comment
+*/
+char str[] = "str";
+`
+	counters, err = getCountersForCode(code, "c")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=c
+	code = `
+if (x > 3) {
+	x = 4;
+}
+else {
+	if (x > 7) {
+			x = 8;
+	}
+}
+`
+	counters, err = getCountersForCode(code, "c")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(6), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=c
+	code = `
+if (x > 3) {
+  x = 4;
+}
+else {
+  if (x > 7) {
+     x = 8;
+   }
+}
+`
+	counters, err = getCountersForCode(code, "c")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(12), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(7), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=c
+	code = `
+struct v {
+   union { // anonymous union
+      struct { int i, j; }; // anonymous structure
+      struct { long k, l; } w;
+   };
+   int m;
+} v1;
+`
+	counters, err = getCountersForCode(code, "c")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(7), counters.LinesOfCode)
+	r.Equal(float64(4), counters.Keywords)
+	r.Equal(float64(21), counters.Indentations)
+	r.Equal(float64(7), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(6), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(2), math.Round(counters.IndentationsDiffNormalized))
+}
+
+func TestCountersForCFullSample(t *testing.T) {
+	r := assert.New(t)
+
+	counters, err := getCountersForCode(test_resources.CCode, "c")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(693), counters.Lines)
+	r.Equal(float64(566), counters.LinesOfCode)
+	r.Equal(float64(187), counters.Keywords)
+	r.Equal(float64(922), counters.Indentations)
+	r.Equal(float64(922), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(228), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(228), math.Round(counters.IndentationsDiffNormalized))
+	r.Equal(float64(33), math.Round(counters.KeywordsComplexity*100))
+	r.Equal(float64(163), math.Round(counters.IndentationsComplexity*100))
+	r.Equal(float64(40), math.Round(counters.IndentationsDiffComplexity*100))
+}
+
+func TestCountersFoCpp(t *testing.T) {
+	r := assert.New(t)
+
+	// language=cpp
+	code := `
+// comment
+int x = 3;
+/* another comment */
+`
+	counters, err := getCountersForCode(code, "cpp")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=cpp
+	code = `
+/*
+* multiline comment
+*/
+char str[] = "str";
+`
+	counters, err = getCountersForCode(code, "cpp")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=cpp
+	code = `
+if (x > 3) {
+	x = 4;
+}
+else {
+	if (x > 7) {
+			x = 8;
+	}
+}
+`
+	counters, err = getCountersForCode(code, "cpp")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(6), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=cpp
+	code = `
+if (x > 3) {
+  x = 4;
+}
+else {
+  if (x > 7) {
+     x = 8;
+   }
+}
+`
+	counters, err = getCountersForCode(code, "cpp")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(12), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(7), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=cpp
+	code = `
+#include <iostream>
+using namespace std;
+  
+template <typename T>
+class Array {
+private:
+    T* ptr;
+    int size;
+  
+public:
+    Array(T arr[], int s);
+    void print();
+};
+`
+	counters, err = getCountersForCode(code, "cpp")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(10), counters.LinesOfCode)
+	r.Equal(float64(4), counters.Keywords)
+	r.Equal(float64(16), counters.Indentations)
+	r.Equal(float64(4), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(8), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(2), math.Round(counters.IndentationsDiffNormalized))
+}
+
+func TestCountersForCppFullSample(t *testing.T) {
+	r := assert.New(t)
+
+	counters, err := getCountersForCode(test_resources.CppCode, "cpp")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(369), counters.Lines)
+	r.Equal(float64(240), counters.LinesOfCode)
+	r.Equal(float64(48), counters.Keywords)
+	r.Equal(float64(1336), counters.Indentations)
+	r.Equal(float64(1336), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(344), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(344), math.Round(counters.IndentationsDiffNormalized))
+	r.Equal(float64(20), math.Round(counters.KeywordsComplexity*100))
+	r.Equal(float64(557), math.Round(counters.IndentationsComplexity*100))
+	r.Equal(float64(143), math.Round(counters.IndentationsDiffComplexity*100))
+}
+
+func TestCountersForObjectivec(t *testing.T) {
+	r := assert.New(t)
+
+	// language=mm
+	code := `
+// comment
+int x = 3;
+/* another comment */
+`
+	counters, err := getCountersForCode(code, "objectivec")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=mm
+	code = `
+/*
+ multiline comment
+*/
+char str[] = "str";
+`
+	counters, err = getCountersForCode(code, "objectivec")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=mm
+	code = `
+if (x > 3) {
+	x = 4;
+}
+else {
+	if (x > 7) {
+			x = 8;
+	}
+}
+`
+	counters, err = getCountersForCode(code, "objectivec")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(6), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=mm
+	code = `
+if (x > 3) {
+  x = 4;
+}
+else {
+  if (x > 7) {
+     x = 8;
+   }
+}
+`
+	counters, err = getCountersForCode(code, "objectivec")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(12), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(7), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=mm
+	code = `
+@interface XYZPerson : NSObject
+- (void)sayHello;
+@end
+
+#import "XYZPerson.h"
+ 
+@implementation XYZPerson
+- (void)sayHello {
+    NSLog( @"Hello, World!" );
+}
+@end
+`
+	counters, err = getCountersForCode(code, "objectivec")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(4), counters.Keywords)
+	r.Equal(float64(4), counters.Indentations)
+	r.Equal(float64(1), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(1), math.Round(counters.IndentationsDiffNormalized))
+}
+
+func TestCountersForOjbectivecFullSample(t *testing.T) {
+	r := assert.New(t)
+
+	counters, err := getCountersForCode(test_resources.ObjectivecCode, "cpp")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1404), counters.Lines)
+	r.Equal(float64(1105), counters.LinesOfCode)
+	r.Equal(float64(120), counters.Keywords)
+	r.Equal(float64(1758), counters.Indentations)
+	r.Equal(float64(1758), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(207), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(207), math.Round(counters.IndentationsDiffNormalized))
+	r.Equal(float64(11), math.Round(counters.KeywordsComplexity*100))
+	r.Equal(float64(159), math.Round(counters.IndentationsComplexity*100))
+	r.Equal(float64(19), math.Round(counters.IndentationsDiffComplexity*100))
+}
+
+func TestCountersForSwift(t *testing.T) {
+	r := assert.New(t)
+
+	// language=swift
+	code := `
+// comment
+var x: Int = 17
+/* another comment */
+`
+	counters, err := getCountersForCode(code, "swift")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=swift
+	code = `
+/*
+ multiline comment
+*/
+var x: Int = 17
+`
+	counters, err = getCountersForCode(code, "swift")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=swift
+	code = `
+if (x > 3) {
+	x = 4
+}
+else {
+	if (x > 7) {
+			x = 8
+	}
+}
+`
+	counters, err = getCountersForCode(code, "swift")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(6), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=swift
+	code = `
+if (x > 3) {
+  x = 4
+}
+else {
+  if (x > 7) {
+     x = 8
+   }
+}
+`
+	counters, err = getCountersForCode(code, "swift")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(12), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(7), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=swift
+	code = `
+public class Person {
+    private var _id: Int = 0
+    private var _lastName: String = ""
+
+    public init(id: Int, lastName: String) {
+        self.id = id
+        self.lastName = lastName
+    }
+
+    public var id: Int {
+        get {
+            return self._id;
+        }
+        set {
+            if newValue < 0 || newValue > 1000 {
+                // Swift setter cannot throw error.
+                fatalError("invalid value for id")
+            } else {
+                self._id = newValue
+            }
+        }
+    }
+}
+`
+	counters, err = getCountersForCode(code, "swift")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(20), counters.LinesOfCode)
+	r.Equal(float64(7), counters.Keywords)
+	r.Equal(float64(152), counters.Indentations)
+	r.Equal(float64(38), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(28), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(7), math.Round(counters.IndentationsDiffNormalized))
+}
+
+func TestCountersForSwiftFullSample(t *testing.T) {
+	r := assert.New(t)
+
+	counters, err := getCountersForCode(test_resources.SwiftCode, "swift")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(415), counters.Lines)
+	r.Equal(float64(253), counters.LinesOfCode)
+	r.Equal(float64(91), counters.Keywords)
+	r.Equal(float64(2016), counters.Indentations)
+	r.Equal(float64(504), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(280), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(70), math.Round(counters.IndentationsDiffNormalized))
+	r.Equal(float64(36), math.Round(counters.KeywordsComplexity*100))
+	r.Equal(float64(199), math.Round(counters.IndentationsComplexity*100))
+	r.Equal(float64(28), math.Round(counters.IndentationsDiffComplexity*100))
+}
+
+func TestCountersForGo(t *testing.T) {
+	r := assert.New(t)
+
+	// language=swift
+	code := `
+// comment
+var x := 3
+/* another comment */
+`
+	counters, err := getCountersForCode(code, "go")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	code = `
+/*
+ multiline comment
+*/
+var x := "x"
+`
+	counters, err = getCountersForCode(code, "go")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	code = "var x:=`x`"
+	counters, err = getCountersForCode(code, "go")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	code = `
+if x > 3 {
+	x = 4
+} else {
+	if x > 7 {
+			x = 8
+	}
+}
+`
+	counters, err = getCountersForCode(code, "go")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(7), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(6), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	code = `
+if x > 3 {
+  x = 4
+} else {
+  if x > 7 {
+     x = 8
+   }
+}
+`
+	counters, err = getCountersForCode(code, "go")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(7), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(12), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(7), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	code = `
+type Person struct {
+  Name string
+}
+func (p *Person) Talk() {
+  fmt.Println("Hi, my name is", p.Name)
+}
+`
+	counters, err = getCountersForCode(code, "go")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(6), counters.LinesOfCode)
+	r.Equal(float64(2), counters.Keywords)
+	r.Equal(float64(4), counters.Indentations)
+	r.Equal(float64(2), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(2), math.Round(counters.IndentationsDiffNormalized))
+}
+
+func TestCountersForGoFullSample(t *testing.T) {
+	r := assert.New(t)
+
+	counters, err := getCountersForCode(test_resources.GoCode, "go")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(499), counters.Lines)
+	r.Equal(float64(388), counters.LinesOfCode)
+	r.Equal(float64(205), counters.Keywords)
+	r.Equal(float64(671), counters.Indentations)
+	r.Equal(float64(671), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(108), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(108), math.Round(counters.IndentationsDiffNormalized))
+	r.Equal(float64(53), math.Round(counters.KeywordsComplexity*100))
+	r.Equal(float64(173), math.Round(counters.IndentationsComplexity*100))
+	r.Equal(float64(28), math.Round(counters.IndentationsDiffComplexity*100))
+}
+
+func TestCountersFoRust(t *testing.T) {
+	r := assert.New(t)
+
+	// language=rs
+	code := `
+// comment
+let x: u32 = 4;
+/* another comment */
+`
+	counters, err := getCountersForCode(code, "rust")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=rs
+	code = `
+/*
+multiline comment
+*/
+let mut hello = String::from("Hello, ");
+`
+	counters, err = getCountersForCode(code, "rust")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=rs
+	code = `
+if x > 3 {
+	x = 4;
+}
+else {
+	if x > 7 {
+			x = 8;
+	}
+}
+`
+	counters, err = getCountersForCode(code, "rust")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(6), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=rs
+	code = `
+if x > 3 {
+  x = 4;
+}
+else {
+  if x > 7 {
+     x = 8;
+   }
+}
+`
+	counters, err = getCountersForCode(code, "rust")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(3), counters.Keywords)
+	r.Equal(float64(12), counters.Indentations)
+	r.Equal(float64(6), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(7), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=rs
+	code = `
+struct User {
+    username: &str,
+    email: &str,
+    sign_in_count: u64,
+    active: bool,
+}
+
+fn main() {
+    let user1 = User {
+        email: "email",
+        username: "username",
+        active: true,
+        sign_in_count: 1,
+    };
+}
+`
+	counters, err = getCountersForCode(code, "rust")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(14), counters.LinesOfCode)
+	r.Equal(float64(2), counters.Keywords)
+	r.Equal(float64(56), counters.Indentations)
+	r.Equal(float64(14), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(12), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(3), math.Round(counters.IndentationsDiffNormalized))
+}
+
+func TestCountersForRustFullSample(t *testing.T) {
+	r := assert.New(t)
+
+	counters, err := getCountersForCode(test_resources.RustCode, "rust")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(202), counters.Lines)
+	r.Equal(float64(143), counters.LinesOfCode)
+	r.Equal(float64(34), counters.Keywords)
+	r.Equal(float64(936), counters.Indentations)
+	r.Equal(float64(234), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(144), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(36), math.Round(counters.IndentationsDiffNormalized))
+	r.Equal(float64(24), math.Round(counters.KeywordsComplexity*100))
+	r.Equal(float64(164), math.Round(counters.IndentationsComplexity*100))
+	r.Equal(float64(25), math.Round(counters.IndentationsDiffComplexity*100))
+}
+
+func TestCountersFoRuby(t *testing.T) {
+	r := assert.New(t)
+
+	// language=rb
+	code := `
+// comment
+x = 4
+/* another comment */
+`
+	counters, err := getCountersForCode(code, "ruby")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=rb
+	code = `
+/*
+multiline comment
+*/
+x = "x"
+`
+	counters, err = getCountersForCode(code, "ruby")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=rb
+	code = `
+#!/usr/bin/env ruby
+
+=begin
+Every body mentioned this way
+to have multiline comments.
+=end
+
+puts "Hello world!"
+
+<<-DOC
+Also, you could create a docstring.
+which...
+DOC
+
+puts "Hello world!"
+`
+	counters, err = getCountersForCode(code, "ruby")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(2), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=rb
+	code = `
+if x > 3 {
+	x = 4;
+}
+elsif x > 7 {
+			x = 8;
+	}
+}
+`
+	counters, err = getCountersForCode(code, "ruby")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(7), counters.LinesOfCode)
+	r.Equal(float64(2), counters.Keywords)
+	r.Equal(float64(5), counters.Indentations)
+	r.Equal(float64(5), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=rb
+	code = `
+if x > 3 {
+  x = 4;
+}
+elsif x > 7 {
+     x = 8;
+   }
+}
+`
+	counters, err = getCountersForCode(code, "ruby")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(7), counters.LinesOfCode)
+	r.Equal(float64(2), counters.Keywords)
+	r.Equal(float64(10), counters.Indentations)
+	r.Equal(float64(5), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(7), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(4), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=rb
+	code = `
+class Customer
+   @@no_of_customers = 0
+   def initialize(id, name, addr)
+      @cust_id = id
+      @cust_name = name
+      @cust_addr = addr
+   end
+end
+`
+	counters, err = getCountersForCode(code, "ruby")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(8), counters.LinesOfCode)
+	r.Equal(float64(4), counters.Keywords)
+	r.Equal(float64(27), counters.Indentations)
+	r.Equal(float64(9), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(6), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(2), math.Round(counters.IndentationsDiffNormalized))
+}
+
+func TestCountersForRubyFullSample(t *testing.T) {
+	r := assert.New(t)
+
+	counters, err := getCountersForCode(test_resources.RubyCode, "ruby")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(465), counters.Lines)
+	r.Equal(float64(242), counters.LinesOfCode)
+	r.Equal(float64(149), counters.Keywords)
+	r.Equal(float64(1922), counters.Indentations)
+	r.Equal(float64(961), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(145), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(73), math.Round(counters.IndentationsDiffNormalized))
+	r.Equal(float64(62), math.Round(counters.KeywordsComplexity*100))
+	r.Equal(float64(397), math.Round(counters.IndentationsComplexity*100))
+	r.Equal(float64(30), math.Round(counters.IndentationsDiffComplexity*100))
+}

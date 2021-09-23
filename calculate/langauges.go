@@ -323,6 +323,7 @@ var languageToKeywords = map[Language][]string{
 		"loop",
 		"match",
 		"return",
+		"struct",
 		"trait",
 		"use",
 		"where",
@@ -363,7 +364,7 @@ var languageToKeywords = map[Language][]string{
 
 var languagesWithAtSignPrefix = map[Language]bool{
 	"java":      true,
-	"ojectivec": true,
+	"objectivec": true,
 	"python":    true,
 	"kotlin":    true,
 	"scala":     true,
