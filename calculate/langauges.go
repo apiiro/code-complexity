@@ -16,7 +16,6 @@ var languageToExtensions = map[Language][]string{
 	"go":         {"go"},
 	"rust":       {"rs"},
 	"scala":      {"scala", "sc"},
-	"terraform":  {"tf", "tfvars"},
 }
 
 var extensionToLanguage = make(map[Language]string)

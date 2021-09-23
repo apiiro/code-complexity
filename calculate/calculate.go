@@ -131,11 +131,14 @@ func (ctx *context) getCountersForCode(content string, language Language) (*Code
 
 		if len(expectEndingComment) > 0 {
 			// in comment block
-			if strings.Contains(line, expectEndingComment) {
+			endCommentIndex := strings.Index(line, expectEndingComment)
+			if endCommentIndex == -1 {
+				continue
+			} else {
 				// comment block ended on this line
+				line = strings.TrimSpace(line[(endCommentIndex + len(expectEndingComment)):])
 				expectEndingComment = ""
 			}
-			continue
 		}
 
 		cleanLine := strings.TrimSpace(line)
@@ -148,12 +151,18 @@ func (ctx *context) getCountersForCode(content string, language Language) (*Code
 			continue
 		}
 
-		if strings.HasPrefix(cleanLine, "/*") {
+		const pythonMultilineString = "\"\"\""
+		postCommentLine := ""
+		if strings.Contains(cleanLine, "/*") {
 			expectEndingComment = "*/"
-			cleanLine = cleanLine[2:]
-		} else if language == "python" && strings.HasPrefix(cleanLine, "\"\"\"") {
-			expectEndingComment = "\"\"\""
-			cleanLine = cleanLine[3:]
+			commentIndex := strings.Index(cleanLine, "/*")
+			postCommentLine = strings.TrimSpace(cleanLine[2 +commentIndex:])
+			cleanLine = strings.TrimSpace(cleanLine[:commentIndex])
+		} else if language == "python" && strings.Contains(cleanLine, pythonMultilineString) {
+			expectEndingComment = pythonMultilineString
+			commentIndex := strings.Index(cleanLine, pythonMultilineString)
+			postCommentLine = strings.TrimSpace(cleanLine[len(pythonMultilineString) +commentIndex:])
+			cleanLine = strings.TrimSpace(cleanLine[:commentIndex])
 		} else if language == "ruby" && strings.HasPrefix(cleanLine, "=begin") {
 			expectEndingComment = "=end"
 			continue
@@ -162,12 +171,18 @@ func (ctx *context) getCountersForCode(content string, language Language) (*Code
 			continue
 		}
 
-		if len(expectEndingComment) > 0 {
+		if len(postCommentLine) > 0 {
 			// in comment block
-			if strings.Contains(cleanLine, expectEndingComment) {
+			endCommentIndex := strings.Index(postCommentLine, expectEndingComment)
+			if endCommentIndex == -1 {
+				continue
+			} else {
 				// comment block ended on this line
 				expectEndingComment = ""
 			}
+		}
+
+		if len(cleanLine) == 0 {
 			continue
 		}
 

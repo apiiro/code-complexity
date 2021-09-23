@@ -73,6 +73,23 @@ int x = 3;
 
 	// language=java
 	code = `
+int x= 3; /*
+multiline comment
+*/ int y = 4;
+`
+	counters, err = getCountersForCode(code, "java")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(2), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=java
+	code = `
 if (x > 3) {
 	x = 4;
 }
@@ -491,6 +508,44 @@ global x
 
 	// language=py
 	code = `
+"""
+multiline comment
+"""
+global x
+`
+	counters, err = getCountersForCode(code, "python")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(1), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=py
+	code = `
+var x = """
+some long text
+"""
+var x = 3 """
+some long comment
+"""
+`
+	counters, err = getCountersForCode(code, "python")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(2), counters.LinesOfCode) // this isn't completely true -- should count the assigned string as content too, but cest la vi
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=py
+	code = `
 if x > 3:
 	x = 4
 elif (x == 7):
@@ -814,7 +869,6 @@ func TestCountersForScalaFullSample(t *testing.T) {
 	r.Equal(float64(237), math.Round(counters.IndentationsComplexity*100))
 	r.Equal(float64(33), math.Round(counters.IndentationsDiffComplexity*100))
 }
-
 
 // c
 // cpp
