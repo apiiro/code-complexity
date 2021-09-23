@@ -1,13 +1,169 @@
 package calculate
 
 import (
+	"code-complexity/options"
 	"code-complexity/test_resources"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"io/ioutil"
 	"math"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
-// test_resources patterns, encoding
+func getFileCount(basePath string, includes []string, excludes []string) (float64, error) {
+	opts := &options.Options{
+		CodePath:        basePath,
+		IncludePatterns: includes,
+		ExcludePatterns: excludes,
+		VerboseLogging:  true,
+	}
+	summary, err := Complexity(opts)
+	if err != nil {
+		return 0, err
+	}
+	return summary.NumberOfFiles, err
+}
+
+func TestIncludeExcludePatterns(t *testing.T) {
+	r := assert.New(t)
+
+	basePath, err := ioutil.TempDir("", "")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(basePath)
+
+	os.MkdirAll(filepath.Join(basePath, "src"), 0777)
+	os.MkdirAll(filepath.Join(basePath, "src", "nested"), 0777)
+	os.WriteFile(filepath.Join(basePath, "root.java"), []byte{}, 0777)
+	os.WriteFile(filepath.Join(basePath, "a.js"), []byte{}, 0777)
+	os.WriteFile(filepath.Join(basePath, "b.js"), []byte{}, 0777)
+	os.WriteFile(filepath.Join(basePath, "src", "svc.java"), []byte{}, 0777)
+	os.WriteFile(filepath.Join(basePath, "src", "api.js"), []byte{}, 0777)
+	os.WriteFile(filepath.Join(basePath, "src", "nested", "util.js"), []byte{}, 0777)
+
+	filesCount, err := getFileCount(
+		basePath,
+		[]string{
+			"**/*.java",
+			"a.js",
+		},
+		[]string{},
+	)
+	r.Nil(err)
+	r.Equal(float64(3), filesCount)
+
+	filesCount, err = getFileCount(
+		basePath,
+		[]string{},
+		[]string{
+			"**/*.java",
+		},
+	)
+	r.Nil(err)
+	r.Equal(float64(4), filesCount)
+
+	filesCount, err = getFileCount(
+		basePath,
+		[]string{},
+		[]string{
+			"*/*.java",
+			"a.js",
+		},
+	)
+	r.Nil(err)
+	r.Equal(float64(3), filesCount)
+
+	filesCount, err = getFileCount(
+		basePath,
+		[]string{
+			"**/*.js",
+		},
+		[]string{
+			"**/nested/**",
+		},
+	)
+	r.Nil(err)
+	r.Equal(float64(3), filesCount)
+}
+
+func TestEncodings(t *testing.T) {
+	r := require.New(t)
+
+	wdPath, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	basePath := filepath.Join(wdPath, "..", "test_resources", "encoding")
+
+	opts := &options.Options{
+		CodePath:        basePath,
+		IncludePatterns: []string{},
+		ExcludePatterns: []string{},
+		VerboseLogging:  true,
+		MaxFileSizeBytes: 1024 * 1024,
+	}
+	summary, err := Complexity(opts)
+	r.Nil(err)
+	r.Equal(float64(3), summary.NumberOfFiles)
+	r.Equal(float64(5 * 3), summary.CountersByLanguage["go"].LinesOfCode)
+}
+
+func inRange(r *assert.Assertions, value float64, min int, max int) {
+	r.GreaterOrEqual(value, float64(min))
+	r.LessOrEqual(value, float64(max))
+}
+
+func TestDogFood(t *testing.T) {
+	r := assert.New(t)
+
+	wdPath, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	basePath := filepath.Join(wdPath, "..")
+
+	opts := &options.Options{
+		CodePath:        basePath,
+		IncludePatterns: []string{},
+		ExcludePatterns: []string{
+			"test_resources/**",
+			".git/**",
+			".idea/**",
+		},
+		VerboseLogging:  true,
+		MaxFileSizeBytes: 1024 * 1024,
+	}
+	summary, err := Complexity(opts)
+	r.Nil(err)
+	r.Equal(float64(9), summary.NumberOfFiles)
+
+	r.Len(summary.CountersByLanguage, 1)
+	inRange(r, summary.CountersByLanguage["go"].Lines, 2000, 4000)
+	inRange(r, summary.CountersByLanguage["go"].LinesOfCode, 2000, 4000)
+	inRange(r, summary.CountersByLanguage["go"].Keywords, 200, 400)
+	inRange(r, summary.CountersByLanguage["go"].Indentations, 2500, 3500)
+	inRange(r, summary.CountersByLanguage["go"].IndentationsNormalized, 2500, 3500)
+	inRange(r, summary.CountersByLanguage["go"].IndentationsDiff, 400, 600)
+	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffNormalized, 400, 600)
+	inRange(r, summary.CountersByLanguage["go"].IndentationsComplexity, 10, 12)
+	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffComplexity * 100, 200, 210)
+	inRange(r, summary.CountersByLanguage["go"].KeywordsComplexity * 100, 200, 250)
+
+	r.Len(summary.AveragesByLanguage, 1)
+	inRange(r, summary.AveragesByLanguage["go"].Lines, 300, 400)
+	inRange(r, summary.AveragesByLanguage["go"].LinesOfCode, 250, 300)
+	inRange(r, summary.AveragesByLanguage["go"].Keywords, 25, 35)
+	inRange(r, summary.AveragesByLanguage["go"].Indentations, 300, 350)
+	inRange(r, summary.AveragesByLanguage["go"].IndentationsNormalized, 300, 350)
+	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiff, 50, 60)
+	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiffNormalized, 50, 60)
+	inRange(r, summary.AveragesByLanguage["go"].IndentationsComplexity, 1, 2)
+	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiffComplexity* 100, 20, 30)
+	inRange(r, summary.AveragesByLanguage["go"].KeywordsComplexity*100, 20, 30)
+}
 
 func getCountersForCode(code string, language Language) (*CodeCounters, error) {
 	ctx := newContext()
@@ -1394,7 +1550,7 @@ func TestCountersForGo(t *testing.T) {
 	// language=swift
 	code := `
 // comment
-var x := 3
+x := 3
 /* another comment */
 `
 	counters, err := getCountersForCode(code, "go")
@@ -1412,7 +1568,7 @@ var x := 3
 /*
  multiline comment
 */
-var x := "x"
+x := "x"
 `
 	counters, err = getCountersForCode(code, "go")
 	r.Nil(err)

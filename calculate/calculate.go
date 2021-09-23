@@ -48,7 +48,7 @@ func Complexity(opts *options.Options) (*CodeSummary, error) {
 	err = filepath.Walk(
 		opts.CodePath,
 		func(path string, info fs.FileInfo, _ error) error {
-			return ctx.visitPath(path, info)
+			return ctx.visitPath(opts.CodePath, path, info)
 		},
 	)
 	if err != nil {
@@ -62,7 +62,7 @@ func Complexity(opts *options.Options) (*CodeSummary, error) {
 	return &ctx.CodeSummary, nil
 }
 
-func (ctx *context) visitPath(path string, info fs.FileInfo) error {
+func (ctx *context) visitPath(rootPath string, path string, info fs.FileInfo) error {
 
 	if info.IsDir() {
 		if ctx.isExcluded(path) {
@@ -87,7 +87,11 @@ func (ctx *context) visitPath(path string, info fs.FileInfo) error {
 		return nil
 	}
 
-	if ctx.isExcluded(path) || !ctx.isIncluded(path) {
+	relativePath, err := filepath.Rel(rootPath, path)
+	if err != nil {
+		return fmt.Errorf("failed to relativize path %v: %v", path, err)
+	}
+	if ctx.isExcluded(relativePath) || !ctx.isIncluded(relativePath) {
 		ctx.verboseLog("--- file '%v' is not matching patterns", path)
 		return nil
 	}
@@ -156,12 +160,12 @@ func (ctx *context) getCountersForCode(content string, language Language) (*Code
 		if strings.Contains(cleanLine, "/*") {
 			expectEndingComment = "*/"
 			commentIndex := strings.Index(cleanLine, "/*")
-			postCommentLine = strings.TrimSpace(cleanLine[2 +commentIndex:])
+			postCommentLine = strings.TrimSpace(cleanLine[2+commentIndex:])
 			cleanLine = strings.TrimSpace(cleanLine[:commentIndex])
 		} else if language == "python" && strings.Contains(cleanLine, pythonMultilineString) {
 			expectEndingComment = pythonMultilineString
 			commentIndex := strings.Index(cleanLine, pythonMultilineString)
-			postCommentLine = strings.TrimSpace(cleanLine[len(pythonMultilineString) +commentIndex:])
+			postCommentLine = strings.TrimSpace(cleanLine[len(pythonMultilineString)+commentIndex:])
 			cleanLine = strings.TrimSpace(cleanLine[:commentIndex])
 		} else if language == "ruby" && strings.HasPrefix(cleanLine, "=begin") {
 			expectEndingComment = "=end"
@@ -236,7 +240,7 @@ func (ctx *context) readFile(path string) (string, error) {
 }
 
 func (ctx *context) isExcluded(path string) bool {
-	if len(ctx.excludePatterns) > 0 && !matches(path, ctx.excludePatterns) {
+	if len(ctx.excludePatterns) > 0 && matches(path, ctx.excludePatterns) {
 		return true
 	}
 	return false

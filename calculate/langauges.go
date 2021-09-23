@@ -380,6 +380,10 @@ func init() {
 }
 
 func tryGetLanguage(ext string) (Language, bool) {
+	if len(ext) == 0 {
+		return "", false
+	}
+	ext = ext[1:]
 	language, found := extensionToLanguage[ext]
 	return language, found
 }
