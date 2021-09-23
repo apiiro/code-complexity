@@ -3,12 +3,15 @@ package calculate
 import (
 	"code-complexity/options"
 	"code-complexity/test_resources"
+	"github.com/otiai10/copy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"io/fs"
 	"io/ioutil"
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -96,19 +99,39 @@ func TestEncodings(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	basePath := filepath.Join(wdPath, "..", "test_resources", "encoding")
+	sourcePath := filepath.Join(wdPath, "..", "test_resources", "encoding")
+
+	basePath, err := ioutil.TempDir("", "")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(basePath)
+
+	err = copy.Copy(sourcePath, basePath)
+	if err != nil {
+		panic(err)
+	}
+	err = filepath.Walk(basePath, func(path string, info fs.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		return os.Rename(path, strings.Replace(path, ".txt", ".go", 1))
+	})
+	if err != nil {
+		panic(err)
+	}
 
 	opts := &options.Options{
-		CodePath:        basePath,
-		IncludePatterns: []string{},
-		ExcludePatterns: []string{},
-		VerboseLogging:  true,
+		CodePath:         basePath,
+		IncludePatterns:  []string{},
+		ExcludePatterns:  []string{},
+		VerboseLogging:   true,
 		MaxFileSizeBytes: 1024 * 1024,
 	}
 	summary, err := Complexity(opts)
 	r.Nil(err)
 	r.Equal(float64(3), summary.NumberOfFiles)
-	r.Equal(float64(5 * 3), summary.CountersByLanguage["go"].LinesOfCode)
+	r.Equal(float64(5*3), summary.CountersByLanguage["go"].LinesOfCode)
 }
 
 func inRange(r *assert.Assertions, value float64, min int, max int) {
@@ -133,7 +156,7 @@ func TestDogFood(t *testing.T) {
 			".git/**",
 			".idea/**",
 		},
-		VerboseLogging:  true,
+		VerboseLogging:   true,
 		MaxFileSizeBytes: 1024 * 1024,
 	}
 	summary, err := Complexity(opts)
@@ -149,8 +172,8 @@ func TestDogFood(t *testing.T) {
 	inRange(r, summary.CountersByLanguage["go"].IndentationsDiff, 400, 600)
 	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffNormalized, 400, 600)
 	inRange(r, summary.CountersByLanguage["go"].IndentationsComplexity, 10, 12)
-	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffComplexity * 100, 200, 210)
-	inRange(r, summary.CountersByLanguage["go"].KeywordsComplexity * 100, 200, 250)
+	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffComplexity*100, 200, 210)
+	inRange(r, summary.CountersByLanguage["go"].KeywordsComplexity*100, 200, 250)
 
 	r.Len(summary.AveragesByLanguage, 1)
 	inRange(r, summary.AveragesByLanguage["go"].Lines, 300, 400)
@@ -161,7 +184,7 @@ func TestDogFood(t *testing.T) {
 	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiff, 50, 60)
 	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiffNormalized, 50, 60)
 	inRange(r, summary.AveragesByLanguage["go"].IndentationsComplexity, 1, 2)
-	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiffComplexity* 100, 20, 30)
+	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiffComplexity*100, 20, 30)
 	inRange(r, summary.AveragesByLanguage["go"].KeywordsComplexity*100, 20, 30)
 }
 
