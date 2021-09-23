@@ -28,7 +28,7 @@ OPTIONS:
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	log.SetOutput(os.Stderr)
 	app := &cli.App{
-		Name:    "code-complexity",
+		Name:    "complexity",
 		Usage:   "Estimate source code complexity",
 		Flags:   options.Flags,
 		Version: VERSION,
@@ -41,7 +41,7 @@ OPTIONS:
 			if err != nil {
 				return err
 			}
-			asJson, err := json.Marshal(summary)
+			asJson, err := json.MarshalIndent(summary, "", "  ")
 			if err != nil {
 				return fmt.Errorf("failed to serialize summary to json: %v", err)
 			}

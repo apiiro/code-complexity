@@ -3,22 +3,22 @@ package calculate
 import "fmt"
 
 type CodeSummary struct {
-	CountersByLanguage map[Language]*CodeCounters
-	AveragesByLanguage map[Language]*CodeCounters
-	NumberOfFiles      float64
+	NumberOfFiles      float64                    `json:"number_of_files"`
+	CountersByLanguage map[Language]*CodeCounters `json:"counters_by_language"`
+	AveragesByLanguage map[Language]*CodeCounters `json:"averages_by_language"`
 }
 
 type CodeCounters struct {
-	Lines                      float64
-	LinesOfCode                float64
-	Keywords                   float64
-	Indentations               float64
-	IndentationsNormalized     float64
-	IndentationsDiff           float64
-	IndentationsDiffNormalized float64
-	KeywordsComplexity         float64
-	IndentationsComplexity     float64
-	IndentationsDiffComplexity float64
+	Lines                      float64 `json:"-"`
+	LinesOfCode                float64 `json:"lines_of_code"`
+	Keywords                   float64 `json:"-"`
+	Indentations               float64 `json:"-"`
+	IndentationsNormalized     float64 `json:"-"`
+	IndentationsDiff           float64 `json:"-"`
+	IndentationsDiffNormalized float64 `json:"-"`
+	KeywordsComplexity         float64 `json:"keywords_complexity"`
+	IndentationsComplexity     float64 `json:"indentations_complexity"`
+	IndentationsDiffComplexity float64 `json:"indentations_diff_complexity"`
 }
 
 func (counters *CodeCounters) inc(other *CodeCounters) {

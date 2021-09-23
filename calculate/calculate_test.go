@@ -29,6 +29,20 @@ func getFileCount(basePath string, includes []string, excludes []string) (float6
 	return summary.NumberOfFiles, err
 }
 
+func mkdir(path string) {
+	err := os.MkdirAll(path, 0777)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func touch(filePath string) {
+	err := os.WriteFile(filePath, []byte{}, 0777)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func TestIncludeExcludePatterns(t *testing.T) {
 	r := assert.New(t)
 
@@ -36,16 +50,21 @@ func TestIncludeExcludePatterns(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	defer os.RemoveAll(basePath)
+	defer func() {
+		err := os.RemoveAll(basePath)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
-	os.MkdirAll(filepath.Join(basePath, "src"), 0777)
-	os.MkdirAll(filepath.Join(basePath, "src", "nested"), 0777)
-	os.WriteFile(filepath.Join(basePath, "root.java"), []byte{}, 0777)
-	os.WriteFile(filepath.Join(basePath, "a.js"), []byte{}, 0777)
-	os.WriteFile(filepath.Join(basePath, "b.js"), []byte{}, 0777)
-	os.WriteFile(filepath.Join(basePath, "src", "svc.java"), []byte{}, 0777)
-	os.WriteFile(filepath.Join(basePath, "src", "api.js"), []byte{}, 0777)
-	os.WriteFile(filepath.Join(basePath, "src", "nested", "util.js"), []byte{}, 0777)
+	mkdir(filepath.Join(basePath, "src"))
+	mkdir(filepath.Join(basePath, "src", "nested"))
+	touch(filepath.Join(basePath, "root.java"))
+	touch(filepath.Join(basePath, "a.js"))
+	touch(filepath.Join(basePath, "b.js"))
+	touch(filepath.Join(basePath, "src", "svc.java"))
+	touch(filepath.Join(basePath, "src", "api.js"))
+	touch(filepath.Join(basePath, "src", "nested", "util.js"))
 
 	filesCount, err := getFileCount(
 		basePath,
@@ -172,7 +191,7 @@ func TestDogFood(t *testing.T) {
 	inRange(r, summary.CountersByLanguage["go"].IndentationsDiff, 400, 600)
 	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffNormalized, 400, 600)
 	inRange(r, summary.CountersByLanguage["go"].IndentationsComplexity, 10, 12)
-	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffComplexity*100, 200, 210)
+	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffComplexity*100, 150, 250)
 	inRange(r, summary.CountersByLanguage["go"].KeywordsComplexity*100, 200, 250)
 
 	r.Len(summary.AveragesByLanguage, 1)
