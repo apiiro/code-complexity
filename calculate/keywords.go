@@ -234,7 +234,6 @@ var languageToKeywords = map[Language][]string{
 		"union",
 		"while",
 		"#import",
-		"@import",
 	},
 	"swift": {
 		"class",
