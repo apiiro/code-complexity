@@ -26,4 +26,4 @@ pushd "$TMPDIR" > /dev/null
   rm -rf complexity
 popd > /dev/null
 
-echo "Done: $(git snap -v)"
+echo "Done: $(complexity -v)"
