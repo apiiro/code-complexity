@@ -67,6 +67,8 @@ complexity -d "proj/src" -o "proj/output.json" -c "proj/.config.json"
 complexity -d "proj/src" -o "proj/output.json" -c "proj/.config.json" -i 'src/**,**.js,**.ts' -e 'test/**'
 ```
 
+Default include/exclude patterns are defined in [config.go](options/config.go), you can extend or override them.
+
 ## Install
 
 ```bash
