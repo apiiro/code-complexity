@@ -27,7 +27,7 @@ OPTIONS:
 
 ## Output
 
-Per supported [programming language](#languages), the tool will plot the number of source files, and following metrics, in both "total" and "average" sections:
+Per supported [programming language](#languages), the tool will plot the number of source files, and following metrics, in both `total` and `average` sections:
 
 * Lines of Code (`lines_of_code`) - Number of lines that don't contain whitespace or comments.
 * Keywords Complexity (`keywords_complexity`) - Number of keywords per line of code. Keyword is a rough estimation of control statements that are defined per language, see [languageToKeywords](calculate/keywords.go).
@@ -38,21 +38,21 @@ Output example:
 
 ```json
 {
-  "number_of_files": 13,
+  "number_of_files": 9,
   "counters_by_language": {
     "go": {
-      "lines_of_code": 5091,
-      "keywords_complexity": 2.947819616200504,
-      "indentations_complexity": 31.149417838304803,
-      "indentations_diff_complexity": 4.619751490661065
-    }
-  },
-  "averages_by_language": {
-    "go": {
-      "lines_of_code": 391.61538461538464,
-      "keywords_complexity": 0.22675535509234646,
-      "indentations_complexity": 2.396109064484985,
-      "indentations_diff_complexity": 0.35536549928162037
+      "total": {
+        "lines_of_code": 2375,
+        "keywords_complexity": 2.039535414531353,
+        "indentations_complexity": 11.931293051842783,
+        "indentations_diff_complexity": 1.9044440275914503
+      },
+      "average": {
+        "lines_of_code": 263.8888888888889,
+        "keywords_complexity": 0.22661504605903923,
+        "indentations_complexity": 1.3256992279825315,
+        "indentations_diff_complexity": 0.21160489195460558
+      }
     }
   }
 }

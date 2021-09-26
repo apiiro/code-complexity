@@ -152,7 +152,7 @@ func ParseOptions(c *cli.Context) (*Options, error) {
 		opts.IncludePatterns = append(opts.IncludePatterns, cfg.IncludePatterns...)
 	}
 	if len(cfg.ExcludePatterns) > 0 {
-		opts.IncludePatterns = append(opts.ExcludePatterns, cfg.ExcludePatterns...)
+		opts.ExcludePatterns = append(opts.ExcludePatterns, cfg.ExcludePatterns...)
 	}
 
 	return opts, nil

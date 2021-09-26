@@ -124,7 +124,12 @@ func TestEncodings(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	defer os.RemoveAll(basePath)
+	defer func() {
+		err := os.RemoveAll(basePath)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	err = copy.Copy(sourcePath, basePath)
 	if err != nil {
@@ -150,7 +155,7 @@ func TestEncodings(t *testing.T) {
 	summary, err := Complexity(opts)
 	r.Nil(err)
 	r.Equal(float64(3), summary.NumberOfFiles)
-	r.Equal(float64(5*3), summary.CountersByLanguage["go"].LinesOfCode)
+	r.Equal(float64(5*3), summary.CountersByLanguage["go"].Total.LinesOfCode)
 }
 
 func inRange(r *assert.Assertions, value float64, min int, max int) {
@@ -183,28 +188,30 @@ func TestDogFood(t *testing.T) {
 	r.Equal(float64(9), summary.NumberOfFiles)
 
 	r.Len(summary.CountersByLanguage, 1)
-	inRange(r, summary.CountersByLanguage["go"].Lines, 2000, 4000)
-	inRange(r, summary.CountersByLanguage["go"].LinesOfCode, 2000, 4000)
-	inRange(r, summary.CountersByLanguage["go"].Keywords, 200, 400)
-	inRange(r, summary.CountersByLanguage["go"].Indentations, 2500, 3500)
-	inRange(r, summary.CountersByLanguage["go"].IndentationsNormalized, 2500, 3500)
-	inRange(r, summary.CountersByLanguage["go"].IndentationsDiff, 400, 600)
-	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffNormalized, 400, 600)
-	inRange(r, summary.CountersByLanguage["go"].IndentationsComplexity, 10, 12)
-	inRange(r, summary.CountersByLanguage["go"].IndentationsDiffComplexity*100, 150, 250)
-	inRange(r, summary.CountersByLanguage["go"].KeywordsComplexity*100, 200, 250)
 
-	r.Len(summary.AveragesByLanguage, 1)
-	inRange(r, summary.AveragesByLanguage["go"].Lines, 300, 400)
-	inRange(r, summary.AveragesByLanguage["go"].LinesOfCode, 250, 300)
-	inRange(r, summary.AveragesByLanguage["go"].Keywords, 25, 35)
-	inRange(r, summary.AveragesByLanguage["go"].Indentations, 300, 350)
-	inRange(r, summary.AveragesByLanguage["go"].IndentationsNormalized, 300, 350)
-	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiff, 50, 60)
-	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiffNormalized, 50, 60)
-	inRange(r, summary.AveragesByLanguage["go"].IndentationsComplexity, 1, 2)
-	inRange(r, summary.AveragesByLanguage["go"].IndentationsDiffComplexity*100, 20, 30)
-	inRange(r, summary.AveragesByLanguage["go"].KeywordsComplexity*100, 20, 30)
+	total := summary.CountersByLanguage["go"].Total
+	inRange(r, total.Lines, 2000, 4000)
+	inRange(r, total.LinesOfCode, 2000, 4000)
+	inRange(r, total.Keywords, 200, 400)
+	inRange(r, total.Indentations, 2500, 3500)
+	inRange(r, total.IndentationsNormalized, 2500, 3500)
+	inRange(r, total.IndentationsDiff, 400, 600)
+	inRange(r, total.IndentationsDiffNormalized, 400, 600)
+	inRange(r, total.IndentationsComplexity, 10, 12)
+	inRange(r, total.IndentationsDiffComplexity*100, 150, 250)
+	inRange(r, total.KeywordsComplexity*100, 200, 250)
+
+	average := summary.CountersByLanguage["go"].Average
+	inRange(r, average.Lines, 300, 400)
+	inRange(r, average.LinesOfCode, 250, 300)
+	inRange(r, average.Keywords, 25, 35)
+	inRange(r, average.Indentations, 300, 350)
+	inRange(r, average.IndentationsNormalized, 300, 350)
+	inRange(r, average.IndentationsDiff, 50, 60)
+	inRange(r, average.IndentationsDiffNormalized, 50, 60)
+	inRange(r, average.IndentationsComplexity, 1, 2)
+	inRange(r, average.IndentationsDiffComplexity*100, 20, 30)
+	inRange(r, average.KeywordsComplexity*100, 20, 30)
 }
 
 func getCountersForCode(code string, language Language) (*CodeCounters, error) {

@@ -23,8 +23,7 @@ type context struct {
 func newContext() *context {
 	return &context{
 		CodeSummary: CodeSummary{
-			CountersByLanguage: make(map[Language]*CodeCounters),
-			AveragesByLanguage: make(map[Language]*CodeCounters),
+			CountersByLanguage: make(map[Language]*SummaryCounters),
 		},
 	}
 }
@@ -55,8 +54,8 @@ func Complexity(opts *options.Options) (*CodeSummary, error) {
 		return nil, fmt.Errorf("failed to walk files under '%v': %v", opts.CodePath, err)
 	}
 
-	for language, counters := range ctx.CountersByLanguage {
-		ctx.AveragesByLanguage[language] = counters.average(ctx.NumberOfFiles)
+	for _, counters := range ctx.CountersByLanguage {
+		counters.Average = counters.Total.average(ctx.NumberOfFiles)
 	}
 
 	return &ctx.CodeSummary, nil
@@ -96,18 +95,21 @@ func (ctx *context) visitPath(rootPath string, path string, info fs.FileInfo) er
 		return nil
 	}
 
-	counters, err := ctx.getCountersForPath(path, language)
+	fileCounters, err := ctx.getCountersForPath(path, language)
 	if err != nil {
 		return fmt.Errorf("failed to count at %v: %v", path, err)
 	}
-	ctx.verboseLog("+++ '%v': %v", path, counters)
+	ctx.verboseLog("+++ '%v': %v", path, fileCounters)
 
-	totalCounters, found := ctx.CountersByLanguage[language]
+	summaryCounters, found := ctx.CountersByLanguage[language]
 	if !found {
-		totalCounters = &CodeCounters{}
-		ctx.CountersByLanguage[language] = totalCounters
+		summaryCounters = &SummaryCounters{
+			Total:   &CodeCounters{},
+			Average: &CodeCounters{},
+		}
+		ctx.CountersByLanguage[language] = summaryCounters
 	}
-	totalCounters.inc(counters)
+	summaryCounters.Total.inc(fileCounters)
 	ctx.NumberOfFiles++
 
 	return nil
