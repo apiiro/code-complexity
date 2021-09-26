@@ -26,7 +26,11 @@ func getFileCount(basePath string, includes []string, excludes []string) (float6
 	if err != nil {
 		return 0, err
 	}
-	return summary.NumberOfFiles, err
+	totalNumberOfFiles := float64(0)
+	for _, counters := range summary.CountersByLanguage {
+		totalNumberOfFiles += counters.NumberOfFiles
+	}
+	return totalNumberOfFiles, err
 }
 
 func mkdir(path string) {
@@ -154,7 +158,7 @@ func TestEncodings(t *testing.T) {
 	}
 	summary, err := Complexity(opts)
 	r.Nil(err)
-	r.Equal(float64(3), summary.NumberOfFiles)
+	r.Equal(float64(3), summary.CountersByLanguage["go"].NumberOfFiles)
 	r.Equal(float64(5*3), summary.CountersByLanguage["go"].Total.LinesOfCode)
 }
 
@@ -185,9 +189,10 @@ func TestDogFood(t *testing.T) {
 	}
 	summary, err := Complexity(opts)
 	r.Nil(err)
-	r.Equal(float64(9), summary.NumberOfFiles)
 
 	r.Len(summary.CountersByLanguage, 1)
+
+	r.Equal(float64(9), summary.CountersByLanguage["go"].NumberOfFiles)
 
 	total := summary.CountersByLanguage["go"].Total
 	inRange(r, total.Lines, 2000, 4000)

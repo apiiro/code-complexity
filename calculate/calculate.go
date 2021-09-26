@@ -55,7 +55,7 @@ func Complexity(opts *options.Options) (*CodeSummary, error) {
 	}
 
 	for _, counters := range ctx.CountersByLanguage {
-		counters.Average = counters.Total.average(ctx.NumberOfFiles)
+		counters.Average = counters.Total.average(counters.NumberOfFiles)
 	}
 
 	return &ctx.CodeSummary, nil
@@ -110,7 +110,7 @@ func (ctx *context) visitPath(rootPath string, path string, info fs.FileInfo) er
 		ctx.CountersByLanguage[language] = summaryCounters
 	}
 	summaryCounters.Total.inc(fileCounters)
-	ctx.NumberOfFiles++
+	summaryCounters.NumberOfFiles++
 
 	return nil
 }

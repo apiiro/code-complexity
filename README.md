@@ -38,20 +38,20 @@ Output example:
 
 ```json
 {
-  "number_of_files": 9,
   "counters_by_language": {
     "go": {
+      "number_of_files": 9,
       "total": {
-        "lines_of_code": 2375,
-        "keywords_complexity": 2.039535414531353,
-        "indentations_complexity": 11.931293051842783,
-        "indentations_diff_complexity": 1.9044440275914503
+        "lines_of_code": 2374,
+        "keywords_complexity": 2.039620976028679,
+        "indentations_complexity": 11.930908025104817,
+        "indentations_diff_complexity": 1.9046008903365483
       },
       "average": {
-        "lines_of_code": 263.8888888888889,
-        "keywords_complexity": 0.22661504605903923,
-        "indentations_complexity": 1.3256992279825315,
-        "indentations_diff_complexity": 0.21160489195460558
+        "lines_of_code": 263.77777777777777,
+        "keywords_complexity": 0.22662455289207545,
+        "indentations_complexity": 1.3256564472338686,
+        "indentations_diff_complexity": 0.21162232114850538
       }
     }
   }

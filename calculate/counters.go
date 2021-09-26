@@ -3,13 +3,13 @@ package calculate
 import "fmt"
 
 type CodeSummary struct {
-	NumberOfFiles      float64                       `json:"number_of_files"`
 	CountersByLanguage map[Language]*SummaryCounters `json:"counters_by_language"`
 }
 
 type SummaryCounters struct {
-	Total   *CodeCounters `json:"total"`
-	Average *CodeCounters `json:"average"`
+	NumberOfFiles float64       `json:"number_of_files"`
+	Total         *CodeCounters `json:"total"`
+	Average       *CodeCounters `json:"average"`
 }
 
 type CodeCounters struct {
