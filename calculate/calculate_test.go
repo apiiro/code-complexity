@@ -3,9 +3,6 @@ package calculate
 import (
 	"code-complexity/options"
 	"code-complexity/test_resources"
-	"github.com/otiai10/copy"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/fs"
 	"io/ioutil"
 	"math"
@@ -13,6 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/otiai10/copy"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func getFileCount(basePath string, includes []string, excludes []string) (float64, error) {
@@ -190,7 +191,7 @@ func TestDogFood(t *testing.T) {
 	summary, err := Complexity(opts)
 	r.Nil(err)
 
-	r.Len(summary.CountersByLanguage, 1)
+	r.Len(summary.CountersByLanguage, 2)
 
 	r.Equal(float64(9), summary.CountersByLanguage["go"].NumberOfFiles)
 
@@ -202,16 +203,16 @@ func TestDogFood(t *testing.T) {
 	inRange(r, total.IndentationsNormalized, 2500, 3500)
 	inRange(r, total.IndentationsDiff, 400, 600)
 	inRange(r, total.IndentationsDiffNormalized, 400, 600)
-	inRange(r, total.IndentationsComplexity, 10, 12)
+	inRange(r, total.IndentationsComplexity, 11, 13)
 	inRange(r, total.IndentationsDiffComplexity*100, 150, 250)
 	inRange(r, total.KeywordsComplexity*100, 200, 250)
 
 	average := summary.CountersByLanguage["go"].Average
 	inRange(r, average.Lines, 300, 400)
 	inRange(r, average.LinesOfCode, 250, 300)
-	inRange(r, average.Keywords, 25, 35)
-	inRange(r, average.Indentations, 300, 350)
-	inRange(r, average.IndentationsNormalized, 300, 350)
+	inRange(r, average.Keywords, 30, 40)
+	inRange(r, average.Indentations, 350, 400)
+	inRange(r, average.IndentationsNormalized, 350, 400)
 	inRange(r, average.IndentationsDiff, 50, 60)
 	inRange(r, average.IndentationsDiffNormalized, 50, 60)
 	inRange(r, average.IndentationsComplexity, 1, 2)
@@ -297,6 +298,35 @@ multiline comment
 	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
 	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
 	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=java
+	code = `
+const path = "dir/*.ext";
+int x = 1;
+int y = 2;
+`
+	counters, err = getCountersForCode(code, "java")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(3), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=java
+	code = `
+const path = 'dir/*';
+int x = 1;
+int y = 2;
+`
+	counters, err = getCountersForCode(code, "java")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(3), counters.LinesOfCode)
 
 	// language=java
 	code = `
