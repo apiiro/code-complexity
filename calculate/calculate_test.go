@@ -191,7 +191,7 @@ func TestDogFood(t *testing.T) {
 	summary, err := Complexity(opts)
 	r.Nil(err)
 
-	r.Len(summary.CountersByLanguage, 1)
+	r.Len(summary.CountersByLanguage, 2)
 
 	r.Equal(float64(9), summary.CountersByLanguage["go"].NumberOfFiles)
 
