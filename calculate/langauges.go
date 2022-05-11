@@ -16,6 +16,7 @@ var languageToExtensions = map[Language][]string{
 	"go":         {"go"},
 	"rust":       {"rs"},
 	"scala":      {"scala", "sc"},
+	"php":        {"php", "phtml", "php3", "php4", "php5", "php7", "phps", "pht", "phar"},
 }
 
 var extensionToLanguage = make(map[Language]string)
