@@ -5,12 +5,13 @@ import (
 	"code-complexity/options"
 	"encoding/json"
 	"fmt"
-	"github.com/urfave/cli/v2"
 	"log"
 	"os"
+
+	"github.com/urfave/cli/v2"
 )
 
-const VERSION = "1.0.1"
+const VERSION = "1.0.2"
 
 func main() {
 	cli.AppHelpTemplate =
