@@ -3,13 +3,14 @@ package calculate
 import (
 	"code-complexity/options"
 	"fmt"
-	"github.com/gobwas/glob"
-	"golang.org/x/net/html/charset"
 	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/gobwas/glob"
+	"golang.org/x/net/html/charset"
 )
 
 type context struct {
@@ -159,7 +160,7 @@ func (ctx *context) getCountersForCode(content string, language Language) (*Code
 
 		const pythonMultilineString = "\"\"\""
 		postCommentLine := ""
-		if strings.Contains(cleanLine, "/*") {
+		if strings.Contains(cleanLine, "/*") && !strings.Contains(cleanLine, "/*.") {
 			expectEndingComment = "*/"
 			commentIndex := strings.Index(cleanLine, "/*")
 			postCommentLine = strings.TrimSpace(cleanLine[2+commentIndex:])

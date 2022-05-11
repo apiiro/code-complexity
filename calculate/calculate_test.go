@@ -3,9 +3,6 @@ package calculate
 import (
 	"code-complexity/options"
 	"code-complexity/test_resources"
-	"github.com/otiai10/copy"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/fs"
 	"io/ioutil"
 	"math"
@@ -13,6 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/otiai10/copy"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func getFileCount(basePath string, includes []string, excludes []string) (float64, error) {
@@ -292,6 +293,23 @@ multiline comment
 	r.NotNil(counters)
 
 	r.Equal(float64(2), counters.LinesOfCode)
+	r.Equal(float64(0), counters.Keywords)
+	r.Equal(float64(0), counters.Indentations)
+	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=java
+	code = `
+const path = "dir/*.ext";
+int x = 1;
+int y = 2;
+`
+	counters, err = getCountersForCode(code, "java")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(3), counters.LinesOfCode)
 	r.Equal(float64(0), counters.Keywords)
 	r.Equal(float64(0), counters.Indentations)
 	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
