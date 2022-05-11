@@ -203,16 +203,16 @@ func TestDogFood(t *testing.T) {
 	inRange(r, total.IndentationsNormalized, 2500, 3500)
 	inRange(r, total.IndentationsDiff, 400, 600)
 	inRange(r, total.IndentationsDiffNormalized, 400, 600)
-	inRange(r, total.IndentationsComplexity, 10, 12)
+	inRange(r, total.IndentationsComplexity, 11, 13)
 	inRange(r, total.IndentationsDiffComplexity*100, 150, 250)
 	inRange(r, total.KeywordsComplexity*100, 200, 250)
 
 	average := summary.CountersByLanguage["go"].Average
 	inRange(r, average.Lines, 300, 400)
 	inRange(r, average.LinesOfCode, 250, 300)
-	inRange(r, average.Keywords, 25, 35)
-	inRange(r, average.Indentations, 300, 350)
-	inRange(r, average.IndentationsNormalized, 300, 350)
+	inRange(r, average.Keywords, 30, 40)
+	inRange(r, average.Indentations, 350, 400)
+	inRange(r, average.IndentationsNormalized, 350, 400)
 	inRange(r, average.IndentationsDiff, 50, 60)
 	inRange(r, average.IndentationsDiffNormalized, 50, 60)
 	inRange(r, average.IndentationsComplexity, 1, 2)
@@ -315,6 +315,18 @@ int y = 2;
 	r.Equal(float64(0), math.Round(counters.IndentationsNormalized))
 	r.Equal(float64(0), math.Round(counters.IndentationsDiff))
 	r.Equal(float64(0), math.Round(counters.IndentationsDiffNormalized))
+
+	// language=java
+	code = `
+const path = 'dir/*';
+int x = 1;
+int y = 2;
+`
+	counters, err = getCountersForCode(code, "java")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(3), counters.LinesOfCode)
 
 	// language=java
 	code = `

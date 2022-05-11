@@ -160,7 +160,7 @@ func (ctx *context) getCountersForCode(content string, language Language) (*Code
 
 		const pythonMultilineString = "\"\"\""
 		postCommentLine := ""
-		if strings.Contains(cleanLine, "/*") && !strings.Contains(cleanLine, "/*.") {
+		if isStartOfMultiLineComment(cleanLine) {
 			expectEndingComment = "*/"
 			commentIndex := strings.Index(cleanLine, "/*")
 			postCommentLine = strings.TrimSpace(cleanLine[2+commentIndex:])
@@ -224,6 +224,22 @@ func (ctx *context) getCountersForCode(content string, language Language) (*Code
 	counters.KeywordsComplexity = safeDivide(counters.Keywords, counters.LinesOfCode)
 
 	return counters, nil
+}
+
+func isStartOfMultiLineComment(cleanLine string) bool {
+	_, after, found := strings.Cut(cleanLine, "/*")
+
+	if !found {
+		return false
+	}
+
+	if len(after) > 1 {
+		nextChar := after[0:1]
+		if strings.ContainsAny(nextChar, "'\".") {
+			return false
+		}
+	}
+	return true
 }
 
 func (ctx *context) readFile(path string) (string, error) {
