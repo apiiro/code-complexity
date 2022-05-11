@@ -117,6 +117,7 @@ Following languages are currently supported:
 * Go
 * Rust
 * Scala
+* Php
 
 ### Credits
 

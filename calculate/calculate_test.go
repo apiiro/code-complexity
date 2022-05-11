@@ -213,8 +213,8 @@ func TestDogFood(t *testing.T) {
 	inRange(r, average.Keywords, 30, 40)
 	inRange(r, average.Indentations, 350, 400)
 	inRange(r, average.IndentationsNormalized, 350, 400)
-	inRange(r, average.IndentationsDiff, 50, 60)
-	inRange(r, average.IndentationsDiffNormalized, 50, 60)
+	inRange(r, average.IndentationsDiff, 60, 70)
+	inRange(r, average.IndentationsDiffNormalized, 60, 70)
 	inRange(r, average.IndentationsComplexity, 1, 2)
 	inRange(r, average.IndentationsDiffComplexity*100, 20, 30)
 	inRange(r, average.KeywordsComplexity*100, 20, 30)
@@ -2036,4 +2036,23 @@ func TestCountersForRubyFullSample(t *testing.T) {
 	r.Equal(float64(62), math.Round(counters.KeywordsComplexity*100))
 	r.Equal(float64(397), math.Round(counters.IndentationsComplexity*100))
 	r.Equal(float64(30), math.Round(counters.IndentationsDiffComplexity*100))
+}
+
+func TestCountersForPhpFullSample(t *testing.T) {
+	r := assert.New(t)
+
+	counters, err := getCountersForCode(test_resources.PhpCode, "php")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(353), counters.Lines)
+	r.Equal(float64(156), counters.LinesOfCode)
+	r.Equal(float64(105), counters.Keywords)
+	r.Equal(float64(900), counters.Indentations)
+	r.Equal(float64(225), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(132), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(33), math.Round(counters.IndentationsDiffNormalized))
+	r.Equal(float64(67), math.Round(counters.KeywordsComplexity*100))
+	r.Equal(float64(144), math.Round(counters.IndentationsComplexity*100))
+	r.Equal(float64(21), math.Round(counters.IndentationsDiffComplexity*100))
 }
