@@ -4,7 +4,6 @@ import (
 	"code-complexity/options"
 	"code-complexity/test_resources"
 	"io/fs"
-	"io/ioutil"
 	"math"
 	"os"
 	"path/filepath"
@@ -51,7 +50,7 @@ func touch(filePath string) {
 func TestIncludeExcludePatterns(t *testing.T) {
 	r := assert.New(t)
 
-	basePath, err := ioutil.TempDir("", "")
+	basePath, err := os.MkdirTemp("", "")
 	if err != nil {
 		panic(err)
 	}
@@ -125,7 +124,7 @@ func TestEncodings(t *testing.T) {
 	}
 	sourcePath := filepath.Join(wdPath, "..", "test_resources", "encoding")
 
-	basePath, err := ioutil.TempDir("", "")
+	basePath, err := os.MkdirTemp("", "")
 	if err != nil {
 		panic(err)
 	}
