@@ -13,10 +13,12 @@ build-osx:
 ifneq ($(shell uname -s),Darwin)
 	$(error this makefile assumes you're building from mac env)
 endif
-	GO111MODULE=on CGO_ENABLED=0 $(GOCMD) build -o bin/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-osx .
+	GOARCH=amd64 GO111MODULE=on CGO_ENABLED=0 $(GOCMD) build -o bin/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-osx-amd64 .
+	GOARCH=arm64 GO111MODULE=on CGO_ENABLED=0 $(GOCMD) build -o bin/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-osx-arm64 .
 
 build-linux:
-	docker run --rm -v $(shell pwd):/app -w /app golang:1.22-alpine /bin/sh -c "GO111MODULE=on CGO_ENABLED=0 $(GOCMD) build -o bin/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux ."
+	docker run --rm -v $(shell pwd):/app -w /app golang:1.22-alpine /bin/sh -c "GOARCH=arm64 GO111MODULE=on CGO_ENABLED=0 $(GOCMD) build -o bin/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux-aarch64 ."
+	docker run --rm -v $(shell pwd):/app -w /app golang:1.22-alpine /bin/sh -c "GOARCH=amd64 GO111MODULE=on CGO_ENABLED=0 $(GOCMD) build -o bin/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux-x86_64 ."
 
 clean:
 	rm -rf ./bin
@@ -32,10 +34,12 @@ test:
 
 verify-binaries:
 	$(info running binaries verification on osx, alpine, debiand, centos)
-	./bin/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-osx --version
-	docker run --rm -v $(shell pwd)/bin:/app -w /app alpine /app/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux --version
-	docker run --rm -v $(shell pwd)/bin:/app -w /app debian:buster /app/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux --version
-	docker run --rm -v $(shell pwd)/bin:/app -w /app centos:8 /app/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux --version
+	./bin/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-osx-amd64 --version
+	./bin/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-osx-arm64 --version
+	docker run --rm -v $(shell pwd)/bin:/app -w /app alpine /app/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux-aarch64 --version
+	docker run --rm -v $(shell pwd)/bin:/app -w /app alpine /app/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux-x86_64 --version
+	docker run --rm -v $(shell pwd)/bin:/app -w /app debian:buster /app/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux-aarch64 --version
+	docker run --rm -v $(shell pwd)/bin:/app -w /app debian:buster /app/$(BINARY_NAME)-$(shell $(GOCMD) run . --version | cut -d" " -f 3)-linux-x86_64 --version
 
 compress-bin:
 	find bin -type f -print -exec zip -j '{}'.zip '{}' \;

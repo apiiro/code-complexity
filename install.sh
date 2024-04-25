@@ -12,12 +12,13 @@ pushd "$TMPDIR" > /dev/null
   mkdir -p complexity
   pushd complexity > /dev/null;
     distro=$(if [[ "$(uname -s)" == "Darwin" ]]; then echo "osx"; else echo "linux"; fi)
+    arch=$(uname -m)
     if [ -n "$1" ]
     then
       echo "Will download and install v$1"
-      curl -sSL --fail -o complexity.zip "https://github.com/apiiro/code-complexity/releases/download/v$1/complexity-$1-$distro.zip"
+      curl -sSL --fail -o complexity.zip "https://github.com/apiiro/code-complexity/releases/download/v$1/complexity-$1-$distro-$arch.zip"
     else
-      curl -s --fail https://api.github.com/repos/apiiro/code-complexity/releases/latest | grep "browser_download_url.*$distro.zip" | cut -d : -f 2,3 | tr -d \" | xargs curl -sSL --fail -o complexity.zip
+      curl -s --fail https://api.github.com/repos/apiiro/code-complexity/releases/latest | grep "browser_download_url.*$distro-$arch.zip" | cut -d : -f 2,3 | tr -d \" | xargs curl -sSL --fail -o complexity.zip
     fi
     unzip complexity.zip
     chmod +x complexity-*
