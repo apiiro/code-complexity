@@ -118,6 +118,7 @@ Following languages are currently supported:
 * Rust
 * Scala
 * Php
+* Fortran
 
 ### Credits
 

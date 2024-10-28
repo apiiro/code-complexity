@@ -68,6 +68,7 @@ func TestIncludeExcludePatterns(t *testing.T) {
 	touch(filepath.Join(basePath, "b.js"))
 	touch(filepath.Join(basePath, "src", "svc.java"))
 	touch(filepath.Join(basePath, "src", "api.js"))
+	touch(filepath.Join(basePath, "src", "foo.F15"))
 	touch(filepath.Join(basePath, "src", "nested", "util.js"))
 	touch(filepath.Join(basePath, "src", "nested", "util2.f90"))
 
@@ -90,7 +91,7 @@ func TestIncludeExcludePatterns(t *testing.T) {
 		},
 	)
 	r.Nil(err)
-	r.Equal(float64(5), filesCount)
+	r.Equal(float64(6), filesCount)
 
 	filesCount, err = getFileCount(
 		basePath,
@@ -99,6 +100,7 @@ func TestIncludeExcludePatterns(t *testing.T) {
 			"*/*.java",
 			"a.js",
 			"**/nested/util2.f90",
+			"**/foo.F15",
 		},
 	)
 	r.Nil(err)
