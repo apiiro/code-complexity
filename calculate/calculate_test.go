@@ -68,7 +68,9 @@ func TestIncludeExcludePatterns(t *testing.T) {
 	touch(filepath.Join(basePath, "b.js"))
 	touch(filepath.Join(basePath, "src", "svc.java"))
 	touch(filepath.Join(basePath, "src", "api.js"))
+	touch(filepath.Join(basePath, "src", "foo.F15"))
 	touch(filepath.Join(basePath, "src", "nested", "util.js"))
+	touch(filepath.Join(basePath, "src", "nested", "util2.f90"))
 
 	filesCount, err := getFileCount(
 		basePath,
@@ -89,7 +91,7 @@ func TestIncludeExcludePatterns(t *testing.T) {
 		},
 	)
 	r.Nil(err)
-	r.Equal(float64(4), filesCount)
+	r.Equal(float64(6), filesCount)
 
 	filesCount, err = getFileCount(
 		basePath,
@@ -97,6 +99,8 @@ func TestIncludeExcludePatterns(t *testing.T) {
 		[]string{
 			"*/*.java",
 			"a.js",
+			"**/nested/util2.f90",
+			"**/foo.F15",
 		},
 	)
 	r.Nil(err)
@@ -198,8 +202,8 @@ func TestDogFood(t *testing.T) {
 	inRange(r, total.Lines, 2000, 4000)
 	inRange(r, total.LinesOfCode, 2000, 4000)
 	inRange(r, total.Keywords, 200, 400)
-	inRange(r, total.Indentations, 2500, 3500)
-	inRange(r, total.IndentationsNormalized, 2500, 3500)
+	inRange(r, total.Indentations, 2500, 3700)
+	inRange(r, total.IndentationsNormalized, 2500, 3700)
 	inRange(r, total.IndentationsDiff, 400, 600)
 	inRange(r, total.IndentationsDiffNormalized, 400, 600)
 	inRange(r, total.IndentationsComplexity, 11, 13)
@@ -208,10 +212,10 @@ func TestDogFood(t *testing.T) {
 
 	average := summary.CountersByLanguage["go"].Average
 	inRange(r, average.Lines, 300, 400)
-	inRange(r, average.LinesOfCode, 250, 300)
+	inRange(r, average.LinesOfCode, 250, 330)
 	inRange(r, average.Keywords, 30, 40)
-	inRange(r, average.Indentations, 350, 400)
-	inRange(r, average.IndentationsNormalized, 350, 400)
+	inRange(r, average.Indentations, 350, 420)
+	inRange(r, average.IndentationsNormalized, 350, 420)
 	inRange(r, average.IndentationsDiff, 60, 70)
 	inRange(r, average.IndentationsDiffNormalized, 60, 70)
 	inRange(r, average.IndentationsComplexity, 1, 2)
@@ -2054,4 +2058,60 @@ func TestCountersForPhpFullSample(t *testing.T) {
 	r.Equal(float64(67), math.Round(counters.KeywordsComplexity*100))
 	r.Equal(float64(144), math.Round(counters.IndentationsComplexity*100))
 	r.Equal(float64(21), math.Round(counters.IndentationsDiffComplexity*100))
+}
+
+func TestCountersForFortran(t *testing.T) {
+	r := assert.New(t)
+
+	// language=Fortran
+	code := `
+program factorial
+    implicit none
+    integer :: n, fact, i
+
+    ! Prompt user for input
+    print *, "Enter a positive integer:"
+    read *, n
+
+    fact = 1  ! Initialize factorial
+
+    ! Calculate factorial
+    do i = 1, n
+        fact = fact * i
+    end do
+
+    ! Output the result
+    print *, "Factorial of", n, "is", fact
+end program factorial
+`
+	counters, err := getCountersForCode(code, "fortran")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(20), counters.Lines)
+	r.Equal(float64(14), counters.LinesOfCode)
+	r.Equal(float64(8), counters.Keywords)
+	r.Equal(float64(52), counters.Indentations)
+	r.Equal(float64(13), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(8), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(2), math.Round(counters.IndentationsDiffNormalized))
+}
+
+func TestCountersForFortranFullSample(t *testing.T) {
+	r := assert.New(t)
+
+	counters, err := getCountersForCode(test_resources.FortranCode, "fortran")
+	r.Nil(err)
+	r.NotNil(counters)
+
+	r.Equal(float64(346), counters.Lines)
+	r.Equal(float64(306), counters.LinesOfCode)
+	r.Equal(float64(146), counters.Keywords)
+	r.Equal(float64(2376), counters.Indentations)
+	r.Equal(float64(594), math.Round(counters.IndentationsNormalized))
+	r.Equal(float64(160), math.Round(counters.IndentationsDiff))
+	r.Equal(float64(40), math.Round(counters.IndentationsDiffNormalized))
+	r.Equal(float64(48), math.Round(counters.KeywordsComplexity*100))
+	r.Equal(float64(194), math.Round(counters.IndentationsComplexity*100))
+	r.Equal(float64(13), math.Round(counters.IndentationsDiffComplexity*100))
 }
